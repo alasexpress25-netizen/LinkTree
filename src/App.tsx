@@ -250,14 +250,53 @@ export default function App() {
       </main>
 
       {/* Footer */}
-      <footer className="w-full py-6 px-4 text-center border-t border-white/5 bg-black/30 backdrop-blur-md text-slate-400 text-xs">
-        <div className="max-w-xl mx-auto flex flex-col items-center justify-center gap-2">
+      <footer className="w-full py-8 px-4 text-center border-t border-white/5 bg-black/30 backdrop-blur-md text-slate-400 text-xs">
+        <div className="max-w-xl mx-auto flex flex-col items-center justify-center gap-4">
           <p className="opacity-90">{profile.footerText}</p>
 
-          <div className="flex items-center gap-3 text-[11px] opacity-70">
+          {/* Company Branding Logo & Link */}
+          {profile.companyBranding?.enabled !== false && (
+            <div className="pt-1 pb-1 flex flex-col items-center">
+              <span className="text-[10px] uppercase tracking-wider text-slate-400 font-medium mb-2 opacity-80">
+                {profile.companyBranding?.label || 'Desarrollado & Diseñado por'}
+              </span>
+              <a
+                href={profile.companyBranding?.websiteUrl || 'https://lavisualmk.alastecno.com'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => {
+                  storageService.recordClick('company-logo', profile.companyBranding?.name || 'LA VISUAL MARKETING');
+                }}
+                className="group relative inline-flex items-center gap-3 px-4 py-2.5 rounded-2xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-amber-400/40 backdrop-blur-md transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg hover:shadow-amber-500/10 cursor-pointer"
+                title={`Visitar ${profile.companyBranding?.name || 'LA VISUAL MARKETING'}`}
+              >
+                <div className="w-10 h-10 rounded-xl overflow-hidden border border-amber-400/30 shadow-md group-hover:border-amber-400/70 group-hover:shadow-amber-500/20 transition-all shrink-0 bg-white/10 flex items-center justify-center p-0.5">
+                  <img
+                    src={profile.companyBranding?.logoUrl || 'la-visual-marketing.png'}
+                    alt={profile.companyBranding?.name || 'LA VISUAL MARKETING'}
+                    className="w-full h-full object-cover rounded-lg"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = 'la-visual-marketing.png';
+                    }}
+                  />
+                </div>
+                <div className="text-left flex flex-col">
+                  <span className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors tracking-wide">
+                    {profile.companyBranding?.name || 'LA VISUAL MARKETING'}
+                  </span>
+                  <span className="text-[10px] text-slate-400 group-hover:text-slate-300 transition-colors flex items-center gap-1 font-mono">
+                    <span>lavisualmk.alastecno.com</span>
+                    <ExternalLink className="w-2.5 h-2.5 text-amber-400 opacity-70 group-hover:opacity-100" />
+                  </span>
+                </div>
+              </a>
+            </div>
+          )}
+
+          <div className="flex items-center gap-3 text-[11px] opacity-70 pt-1">
             <button
               onClick={() => setIsAdminOpen(true)}
-              className="hover:text-amber-400 transition-colors flex items-center gap-1"
+              className="hover:text-amber-400 transition-colors flex items-center gap-1 cursor-pointer"
             >
               <Settings className="w-3 h-3" />
               <span>Panel Administrador</span>

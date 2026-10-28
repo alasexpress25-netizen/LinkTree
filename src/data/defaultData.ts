@@ -72,6 +72,13 @@ export const DEFAULT_PROFILE: ProfileConfig = {
     verifiedBadgeText: 'Cuenta Oficial Verificada',
   },
   pwaIconUrl: 'pwa-512x512.png',
+  companyBranding: {
+    enabled: true,
+    name: 'LA VISUAL MARKETING',
+    logoUrl: 'la-visual-marketing.png',
+    websiteUrl: 'https://lavisualmk.alastecno.com',
+    label: 'Desarrollado & Diseñado por',
+  },
 };
 
 export const DEFAULT_LINKS: LinkItem[] = [

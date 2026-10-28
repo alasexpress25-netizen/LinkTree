@@ -36,7 +36,19 @@ export const storageService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEYS.PROFILE);
       if (stored) {
-        return JSON.parse(stored);
+        const parsed = JSON.parse(stored);
+        return {
+          ...DEFAULT_PROFILE,
+          ...parsed,
+          customTexts: {
+            ...DEFAULT_PROFILE.customTexts,
+            ...(parsed.customTexts || {}),
+          },
+          companyBranding: {
+            ...DEFAULT_PROFILE.companyBranding,
+            ...(parsed.companyBranding || {}),
+          },
+        };
       }
     } catch (e) {
       console.error('Error loading profile', e);

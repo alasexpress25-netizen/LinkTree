@@ -57,6 +57,7 @@ import { storageService } from '../services/storage';
 import { AVAILABLE_ICONS, IconRenderer } from './IconRenderer';
 import { THEME_PRESETS } from '../data/defaultData';
 import { extractYouTubeId, getYouTubeThumbnail, formatSocialUrl } from '../utils/youtube';
+import { downloadPwaIconSet } from '../utils/pwaIcons';
 
 interface AdminModalProps {
   isOpen: boolean;
@@ -139,6 +140,30 @@ export const AdminModal: React.FC<AdminModalProps> = ({
 
   // Success toast helper
   const [statusNotification, setStatusNotification] = useState<string | null>(null);
+
+  // PWA Icon generator state
+  const [isGeneratingIcons, setIsGeneratingIcons] = useState(false);
+  const [pwaProgressStep, setPwaProgressStep] = useState<string | null>(null);
+  const [pwaUploadFile, setPwaUploadFile] = useState<File | null>(null);
+  const [pwaUploadPreview, setPwaUploadPreview] = useState<string | null>(null);
+
+  const handleDownloadPwaIcons = async () => {
+    try {
+      setIsGeneratingIcons(true);
+      const source = pwaUploadFile || profile.pwaIconUrl || profile.avatarUrl;
+      await downloadPwaIconSet(source, (filename) => {
+        setPwaProgressStep(`Generando y descargando ${filename}...`);
+      });
+      showNotification('¡Los 3 iconos PWA se han descargado con éxito!');
+      setPwaProgressStep(null);
+    } catch (err) {
+      console.error(err);
+      showNotification('Error al procesar la imagen para los iconos.');
+      setPwaProgressStep(null);
+    } finally {
+      setIsGeneratingIcons(false);
+    }
+  };
 
   const showNotification = (msg: string) => {
     setStatusNotification(msg);
@@ -1965,6 +1990,162 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                     className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
                   />
                 </div>
+
+                {/* Company Branding Settings */}
+                <div className="pt-4 border-t border-slate-900 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h5 className="text-xs font-bold text-white flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                        <span>Logotipo y Enlace de Empresa en el Pie (Branding)</span>
+                      </h5>
+                      <p className="text-[11px] text-slate-400">
+                        Muestra el logo clickeable de tu agencia o empresa desarrolladora.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const current = profile.companyBranding || {
+                          enabled: true,
+                          name: 'LA VISUAL MARKETING',
+                          logoUrl: 'la-visual-marketing.png',
+                          websiteUrl: 'https://lavisualmk.alastecno.com',
+                          label: 'Desarrollado & Diseñado por',
+                        };
+                        const updated = {
+                          ...profile,
+                          companyBranding: {
+                            ...current,
+                            enabled: !current.enabled,
+                          },
+                        };
+                        onUpdateProfile(updated);
+                        storageService.saveProfile(updated);
+                      }}
+                      className={`px-3 py-1 text-xs font-semibold rounded-lg border cursor-pointer transition-colors ${
+                        profile.companyBranding?.enabled !== false
+                          ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300'
+                          : 'bg-slate-900 border-slate-800 text-slate-400'
+                      }`}
+                    >
+                      {profile.companyBranding?.enabled !== false ? 'Visible' : 'Oculto'}
+                    </button>
+                  </div>
+
+                  {profile.companyBranding?.enabled !== false && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Nombre de la Empresa
+                        </label>
+                        <input
+                          type="text"
+                          value={profile.companyBranding?.name ?? 'LA VISUAL MARKETING'}
+                          onChange={(e) => {
+                            const updated = {
+                              ...profile,
+                              companyBranding: {
+                                ...(profile.companyBranding || {
+                                  enabled: true,
+                                  logoUrl: 'la-visual-marketing.png',
+                                  websiteUrl: 'https://lavisualmk.alastecno.com',
+                                  label: 'Desarrollado & Diseñado por',
+                                }),
+                                name: e.target.value,
+                              },
+                            };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Enlace Web de la Empresa
+                        </label>
+                        <input
+                          type="url"
+                          value={profile.companyBranding?.websiteUrl ?? 'https://lavisualmk.alastecno.com'}
+                          onChange={(e) => {
+                            const updated = {
+                              ...profile,
+                              companyBranding: {
+                                ...(profile.companyBranding || {
+                                  enabled: true,
+                                  name: 'LA VISUAL MARKETING',
+                                  logoUrl: 'la-visual-marketing.png',
+                                  label: 'Desarrollado & Diseñado por',
+                                }),
+                                websiteUrl: e.target.value,
+                              },
+                            };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500 font-mono"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Etiqueta Superior
+                        </label>
+                        <input
+                          type="text"
+                          value={profile.companyBranding?.label ?? 'Desarrollado & Diseñado por'}
+                          onChange={(e) => {
+                            const updated = {
+                              ...profile,
+                              companyBranding: {
+                                ...(profile.companyBranding || {
+                                  enabled: true,
+                                  name: 'LA VISUAL MARKETING',
+                                  logoUrl: 'la-visual-marketing.png',
+                                  websiteUrl: 'https://lavisualmk.alastecno.com',
+                                }),
+                                label: e.target.value,
+                              },
+                            };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-[11px] font-semibold text-slate-300 mb-1">
+                          Ruta o URL del Logo
+                        </label>
+                        <input
+                          type="text"
+                          value={profile.companyBranding?.logoUrl ?? 'la-visual-marketing.png'}
+                          onChange={(e) => {
+                            const updated = {
+                              ...profile,
+                              companyBranding: {
+                                ...(profile.companyBranding || {
+                                  enabled: true,
+                                  name: 'LA VISUAL MARKETING',
+                                  websiteUrl: 'https://lavisualmk.alastecno.com',
+                                  label: 'Desarrollado & Diseñado por',
+                                }),
+                                logoUrl: e.target.value,
+                              },
+                            };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                          }}
+                          className="w-full px-3 py-2 text-xs rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500 font-mono"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           )}
@@ -2101,112 +2282,237 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               </div>
 
-              {/* PWA App Icon Customization */}
-              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+              {/* PWA App Icon Customization & GitHub Asset Generator */}
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-5">
                 <div className="flex items-center justify-between flex-wrap gap-2">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 border border-amber-500/30 flex items-center justify-center">
                       <Smartphone className="w-5 h-5" />
                     </div>
                     <div>
                       <h4 className="text-sm font-bold text-white">Icono de la Aplicación Instalable (PWA)</h4>
                       <p className="text-xs text-slate-400">
-                        Personaliza cómo se verá el icono de la app en la pantalla de inicio de los teléfonos.
+                        Cómo personalizar el icono que aparece en el celular al instalar la app
                       </p>
                     </div>
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = { ...profile, pwaIconUrl: profile.avatarUrl };
-                      onUpdateProfile(updated);
-                      storageService.saveProfile(updated);
-                      showNotification('Icono PWA actualizado con tu foto/logo actual');
-                    }}
-                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 cursor-pointer flex items-center gap-1.5"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>Usar mi Logo/Avatar actual</span>
-                  </button>
+                  <span className="text-[11px] px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-medium">
+                    PWA Activa & Compatible
+                  </span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-2">
-                  <div className="sm:col-span-2 space-y-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-slate-300 mb-1">
-                        URL de la Imagen para el Icono de la App
-                      </label>
+                {/* Important Explanation Callout */}
+                <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2 text-xs">
+                  <div className="font-bold text-amber-300 flex items-center gap-2 text-sm">
+                    <AlertCircle className="w-4 h-4 shrink-0" />
+                    <span>¿Por qué debes reemplazar los archivos en GitHub y la web no lo hace sola?</span>
+                  </div>
+                  <p className="text-amber-100/90 leading-relaxed">
+                    <strong>1. Seguridad de internet:</strong> Tu página web se ejecuta en el navegador de los usuarios y <em>no tiene contraseñas ni permisos para escribir archivos dentro de tu repositorio privado o público de GitHub</em>.
+                  </p>
+                  <p className="text-amber-100/90 leading-relaxed">
+                    <strong>2. Cómo funciona el celular:</strong> Al tocar <em>"Instalar App"</em> o <em>"Agregar a pantalla de inicio"</em>, Android e iPhone descargan directamente los archivos físicos desde la carpeta <code className="bg-amber-950/60 text-amber-300 px-1.5 py-0.5 rounded font-mono">public/</code> de GitHub, no de la memoria temporal del panel.
+                  </p>
+                  <p className="text-emerald-300 font-semibold pt-1">
+                    ✨ ¡Para facilitártelo al 100%, creamos esta herramienta para que descargues los 3 iconos ya recortados y con las medidas exactas con 1 solo clic!
+                  </p>
+                </div>
+
+                {/* Step 1: Choose Source Image */}
+                <div className="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-center font-bold flex items-center justify-center text-[11px]">1</span>
+                    <span>Elige la imagen para el Icono de la App</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                    {/* Option A: Select local file */}
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                      <span className="text-xs font-semibold text-slate-300 block">Subir imagen desde tu PC o Celular:</span>
                       <input
-                        type="url"
-                        value={profile.pwaIconUrl || 'pwa-512x512.png'}
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp,image/svg+xml"
                         onChange={(e) => {
-                          const updated = { ...profile, pwaIconUrl: e.target.value };
-                          onUpdateProfile(updated);
-                          storageService.saveProfile(updated);
+                          const file = e.target.files?.[0];
+                          if (file) {
+                            setPwaUploadFile(file);
+                            const reader = new FileReader();
+                            reader.onload = (ev) => {
+                              setPwaUploadPreview(ev.target?.result as string);
+                            };
+                            reader.readAsDataURL(file);
+                          }
                         }}
-                        placeholder="https://... o pwa-512x512.png"
-                        className="w-full px-3 py-2 text-xs font-mono rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                        className="text-xs text-slate-400 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-amber-500 file:text-slate-950 hover:file:bg-amber-400 cursor-pointer"
                       />
+                      {pwaUploadFile && (
+                        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium">
+                          <Check className="w-3.5 h-3.5" />
+                          <span>Archivo seleccionado: {pwaUploadFile.name}</span>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-[11px] text-slate-400">Presets de icono:</span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = { ...profile, pwaIconUrl: 'pwa-512x512.png' };
-                          onUpdateProfile(updated);
-                          storageService.saveProfile(updated);
-                          showNotification('Icono original restaurado');
-                        }}
-                        className="text-[10px] px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 cursor-pointer"
-                      >
-                        Icono PWA Oficial
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const updated = { ...profile, pwaIconUrl: profile.avatarUrl };
-                          onUpdateProfile(updated);
-                          storageService.saveProfile(updated);
-                          showNotification('Usando tu foto de perfil');
-                        }}
-                        className="text-[10px] px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 cursor-pointer"
-                      >
-                        Logo Actual
-                      </button>
-                    </div>
-
-                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
-                      💡 <strong>Para que sea permanente en tu repositorio de GitHub:</strong><br />
-                      Solo reemplaza los archivos dentro de la carpeta <code className="text-amber-300 font-mono">public/</code> de tu proyecto:
-                      <ul className="list-disc list-inside mt-1 space-y-0.5 text-slate-300">
-                        <li><code className="text-amber-300">public/pwa-192x192.png</code> (192×192 px)</li>
-                        <li><code className="text-amber-300">public/pwa-512x512.png</code> (512×512 px)</li>
-                        <li><code className="text-amber-300">public/apple-touch-icon.png</code> (180×180 px para iPhone)</li>
-                      </ul>
+                    {/* Option B: Quick Presets */}
+                    <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2 flex flex-col justify-between">
+                      <span className="text-xs font-semibold text-slate-300 block">O usa una imagen del proyecto:</span>
+                      <div className="grid grid-cols-1 gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPwaUploadFile(null);
+                            setPwaUploadPreview(profile.avatarUrl);
+                            const updated = { ...profile, pwaIconUrl: profile.avatarUrl };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                            showNotification('Usando tu foto de perfil como icono PWA');
+                          }}
+                          className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Usar Foto / Avatar Actual</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPwaUploadFile(null);
+                            setPwaUploadPreview('la-visual-marketing.png');
+                            const updated = { ...profile, pwaIconUrl: 'la-visual-marketing.png' };
+                            onUpdateProfile(updated);
+                            storageService.saveProfile(updated);
+                            showNotification('Usando logo LA VISUAL MARKETING como icono PWA');
+                          }}
+                          className="w-full py-1.5 px-3 text-xs font-semibold rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                        >
+                          <Sparkles className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Usar Logo LA VISUAL MARKETING</span>
+                        </button>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Phone Home Screen Simulation Preview */}
-                  <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-900 border border-slate-800 text-center">
-                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
-                      Vista en Pantalla de Celular
-                    </span>
-                    <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-2xl border-2 border-amber-400/40 p-0.5 bg-slate-950">
-                      <img
-                        src={profile.pwaIconUrl || 'pwa-512x512.png'}
-                        alt="PWA Icon Preview"
-                        className="w-full h-full object-cover rounded-xl"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = 'pwa-512x512.png';
-                        }}
-                      />
+                  {/* URL override */}
+                  <div className="pt-2">
+                    <label className="block text-[11px] font-semibold text-slate-400 mb-1">
+                      O pega una URL directa de la imagen:
+                    </label>
+                    <input
+                      type="url"
+                      value={profile.pwaIconUrl || 'pwa-512x512.png'}
+                      onChange={(e) => {
+                        const updated = { ...profile, pwaIconUrl: e.target.value };
+                        onUpdateProfile(updated);
+                        storageService.saveProfile(updated);
+                      }}
+                      placeholder="https://... o pwa-512x512.png"
+                      className="w-full px-3 py-2 text-xs font-mono rounded-xl bg-slate-950 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                    />
+                  </div>
+                </div>
+
+                {/* Step 2: Download Ready Icons */}
+                <div className="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
+                  <div className="text-xs font-bold text-white flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-center font-bold flex items-center justify-center text-[11px]">2</span>
+                      <span>Descarga los 3 archivos PNG listos para GitHub</span>
                     </div>
-                    <span className="text-xs font-semibold text-white mt-1.5 truncate max-w-[100px]">
-                      AmorTraspasa
-                    </span>
+
+                    <div className="text-[11px] text-slate-400">
+                      Genera automáticamente: 192×192, 512×512 y 180×180 (iPhone)
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-4 pt-1">
+                    {/* Icon Preview */}
+                    <div className="flex flex-col items-center justify-center p-3 rounded-xl bg-slate-950 border border-slate-800 text-center shrink-0">
+                      <span className="text-[10px] text-slate-400 mb-1.5 font-medium">Previsualización</span>
+                      <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-xl border-2 border-amber-400/50 p-0.5 bg-slate-950">
+                        <img
+                          src={pwaUploadPreview || profile.pwaIconUrl || profile.avatarUrl || 'pwa-512x512.png'}
+                          alt="PWA Icon Preview"
+                          className="w-full h-full object-cover rounded-xl"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = 'pwa-512x512.png';
+                          }}
+                        />
+                      </div>
+                      <span className="text-[10px] font-semibold text-slate-300 mt-1 truncate max-w-[80px]">
+                        AmorTraspasa
+                      </span>
+                    </div>
+
+                    {/* Download CTA Button */}
+                    <div className="flex-1 w-full space-y-2">
+                      <button
+                        type="button"
+                        onClick={handleDownloadPwaIcons}
+                        disabled={isGeneratingIcons}
+                        className="w-full py-3 px-4 text-xs font-bold rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 hover:from-amber-400 hover:to-rose-400 text-slate-950 shadow-lg shadow-amber-500/20 active:scale-[0.99] transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
+                      >
+                        {isGeneratingIcons ? (
+                          <>
+                            <RefreshCw className="w-4 h-4 animate-spin text-slate-950" />
+                            <span>{pwaProgressStep || 'Generando iconos PNG...'}</span>
+                          </>
+                        ) : (
+                          <>
+                            <Download className="w-4 h-4 text-slate-950" />
+                            <span>📥 Descargar los 3 Iconos PNG para GitHub (1 Clic)</span>
+                          </>
+                        )}
+                      </button>
+
+                      <p className="text-[11px] text-slate-400 text-center sm:text-left">
+                        Se descargarán automáticamente: <code className="text-amber-300">pwa-192x192.png</code>, <code className="text-amber-300">pwa-512x512.png</code> y <code className="text-amber-300">apple-touch-icon.png</code>.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Step 3: Upload to GitHub Instructions */}
+                <div className="space-y-3 p-4 rounded-xl bg-slate-900 border border-slate-800">
+                  <div className="text-xs font-bold text-white flex items-center gap-2">
+                    <span className="w-5 h-5 rounded-full bg-amber-500 text-slate-950 text-center font-bold flex items-center justify-center text-[11px]">3</span>
+                    <span>Reemplaza los 3 archivos en tu repositorio de GitHub</span>
+                  </div>
+
+                  <div className="space-y-2 text-xs text-slate-300">
+                    <div className="flex items-start gap-2">
+                      <span className="font-mono text-amber-400 font-bold">1.</span>
+                      <span>
+                        Abre tu repositorio en GitHub: <strong className="text-white">alasexpress25-netizen/LinkTree</strong> y haz clic en la carpeta <strong className="text-amber-300">public/</strong>.
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="font-mono text-amber-400 font-bold">2.</span>
+                      <span>
+                        Arriba a la derecha presiona el botón <strong className="text-white">Add file</strong> ➔ <strong className="text-white">Upload files</strong>.
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="font-mono text-amber-400 font-bold">3.</span>
+                      <span>
+                        Arrastra los 3 archivos que acabas de descargar (<code className="text-amber-300">pwa-192x192.png</code>, <code className="text-amber-300">pwa-512x512.png</code>, <code className="text-amber-300">apple-touch-icon.png</code>) para que reemplacen a los anteriores.
+                      </span>
+                    </div>
+
+                    <div className="flex items-start gap-2">
+                      <span className="font-mono text-amber-400 font-bold">4.</span>
+                      <span>
+                        Haz clic en el botón verde <strong className="text-emerald-400">Commit changes</strong>.
+                      </span>
+                    </div>
+
+                    <div className="mt-3 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-200 flex items-center gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 shrink-0" />
+                      <span>
+                        <strong>¡Listo!</strong> Tu GitHub Action compilará automáticamente en ~30 segundos y a partir de ese momento todos los teléfonos mostrarán tu logo personalizado al instalar.
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

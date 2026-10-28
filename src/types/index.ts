@@ -56,6 +56,14 @@ export interface CustomTextsConfig {
   verifiedBadgeText?: string;
 }
 
+export interface CompanyBrandingConfig {
+  enabled: boolean;
+  name: string;
+  logoUrl: string;
+  websiteUrl: string;
+  label: string;
+}
+
 export interface ProfileConfig {
   name: string;
   handle: string;
@@ -76,6 +84,7 @@ export interface ProfileConfig {
   socialLinks: SocialLink[];
   customTexts?: CustomTextsConfig;
   pwaIconUrl?: string;
+  companyBranding?: CompanyBrandingConfig;
 }
 
 export type ThemePresetId = 'elamor' | 'celestial' | 'oasis' | 'midnight' | 'minimal' | 'sunset' | 'custom';
