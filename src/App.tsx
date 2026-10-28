@@ -49,6 +49,17 @@ export default function App() {
     setAnalytics(updatedAnalytics);
   }, []);
 
+  // Dynamically sync PWA icon & favicon if customized in admin
+  useEffect(() => {
+    if (profile.pwaIconUrl) {
+      const appleTouchIcon = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement;
+      if (appleTouchIcon) appleTouchIcon.href = profile.pwaIconUrl;
+
+      const favicon = document.querySelector('link[rel="icon"]') as HTMLLinkElement;
+      if (favicon) favicon.href = profile.pwaIconUrl;
+    }
+  }, [profile.pwaIconUrl]);
+
   // Handle Link Click with real-time tracking
   const handleLinkClick = (link: LinkItem) => {
     const { updatedAnalytics, updatedLinks } = storageService.recordClick(link.id, link.title);

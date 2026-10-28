@@ -2101,6 +2101,116 @@ export const AdminModal: React.FC<AdminModalProps> = ({
                 </div>
               </div>
 
+              {/* PWA App Icon Customization */}
+              <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                      <Smartphone className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white">Icono de la Aplicación Instalable (PWA)</h4>
+                      <p className="text-xs text-slate-400">
+                        Personaliza cómo se verá el icono de la app en la pantalla de inicio de los teléfonos.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = { ...profile, pwaIconUrl: profile.avatarUrl };
+                      onUpdateProfile(updated);
+                      storageService.saveProfile(updated);
+                      showNotification('Icono PWA actualizado con tu foto/logo actual');
+                    }}
+                    className="px-3 py-1.5 text-xs font-bold rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 cursor-pointer flex items-center gap-1.5"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>Usar mi Logo/Avatar actual</span>
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center pt-2">
+                  <div className="sm:col-span-2 space-y-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        URL de la Imagen para el Icono de la App
+                      </label>
+                      <input
+                        type="url"
+                        value={profile.pwaIconUrl || 'pwa-512x512.png'}
+                        onChange={(e) => {
+                          const updated = { ...profile, pwaIconUrl: e.target.value };
+                          onUpdateProfile(updated);
+                          storageService.saveProfile(updated);
+                        }}
+                        placeholder="https://... o pwa-512x512.png"
+                        className="w-full px-3 py-2 text-xs font-mono rounded-xl bg-slate-900 border border-slate-800 text-white focus:outline-none focus:border-amber-500"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-[11px] text-slate-400">Presets de icono:</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...profile, pwaIconUrl: 'pwa-512x512.png' };
+                          onUpdateProfile(updated);
+                          storageService.saveProfile(updated);
+                          showNotification('Icono original restaurado');
+                        }}
+                        className="text-[10px] px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 cursor-pointer"
+                      >
+                        Icono PWA Oficial
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updated = { ...profile, pwaIconUrl: profile.avatarUrl };
+                          onUpdateProfile(updated);
+                          storageService.saveProfile(updated);
+                          showNotification('Usando tu foto de perfil');
+                        }}
+                        className="text-[10px] px-2.5 py-1 rounded bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 cursor-pointer"
+                      >
+                        Logo Actual
+                      </button>
+                    </div>
+
+                    <div className="p-3 rounded-xl bg-slate-900/80 border border-slate-800 text-[11px] text-slate-400 leading-relaxed">
+                      💡 <strong>Para que sea permanente en tu repositorio de GitHub:</strong><br />
+                      Solo reemplaza los archivos dentro de la carpeta <code className="text-amber-300 font-mono">public/</code> de tu proyecto:
+                      <ul className="list-disc list-inside mt-1 space-y-0.5 text-slate-300">
+                        <li><code className="text-amber-300">public/pwa-192x192.png</code> (192×192 px)</li>
+                        <li><code className="text-amber-300">public/pwa-512x512.png</code> (512×512 px)</li>
+                        <li><code className="text-amber-300">public/apple-touch-icon.png</code> (180×180 px para iPhone)</li>
+                      </ul>
+                    </div>
+                  </div>
+
+                  {/* Phone Home Screen Simulation Preview */}
+                  <div className="flex flex-col items-center justify-center p-4 rounded-2xl bg-slate-900 border border-slate-800 text-center">
+                    <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                      Vista en Pantalla de Celular
+                    </span>
+                    <div className="relative w-16 h-16 rounded-2xl overflow-hidden shadow-2xl border-2 border-amber-400/40 p-0.5 bg-slate-950">
+                      <img
+                        src={profile.pwaIconUrl || 'pwa-512x512.png'}
+                        alt="PWA Icon Preview"
+                        className="w-full h-full object-cover rounded-xl"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'pwa-512x512.png';
+                        }}
+                      />
+                    </div>
+                    <span className="text-xs font-semibold text-white mt-1.5 truncate max-w-[100px]">
+                      AmorTraspasa
+                    </span>
+                  </div>
+                </div>
+              </div>
+
               {/* Styling tweaks */}
               <div className="p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4">
                 <h4 className="text-sm font-bold text-white mb-2">Personalización de Botones & Tarjetas</h4>

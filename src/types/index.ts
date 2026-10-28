@@ -75,6 +75,7 @@ export interface ProfileConfig {
   };
   socialLinks: SocialLink[];
   customTexts?: CustomTextsConfig;
+  pwaIconUrl?: string;
 }
 
 export type ThemePresetId = 'elamor' | 'celestial' | 'oasis' | 'midnight' | 'minimal' | 'sunset' | 'custom';

@@ -71,6 +71,7 @@ export const DEFAULT_PROFILE: ProfileConfig = {
     emptyStateText: 'No hay enlaces en esta categoría.',
     verifiedBadgeText: 'Cuenta Oficial Verificada',
   },
+  pwaIconUrl: 'pwa-512x512.png',
 };
 
 export const DEFAULT_LINKS: LinkItem[] = [
