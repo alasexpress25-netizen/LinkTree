@@ -1,0 +1,6 @@
+{
+  "name": "BioLink El Amor Traspasa - Personalizador y Analíticas",
+  "description": "Página estilo Linktree inspirada en El Amor Traspasa, con personalización de enlaces, temas visuales, panel de administración protegido por contraseña y analíticas de clics en tiempo real.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

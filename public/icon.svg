@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1e1b4b" />
+      <stop offset="50%" stop-color="#0f172a" />
+      <stop offset="100%" stop-color="#450a0a" />
+    </linearGradient>
+    <linearGradient id="gold" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fef08a" />
+      <stop offset="50%" stop-color="#f59e0b" />
+      <stop offset="100%" stop-color="#b45309" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="16" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+
+  <!-- Outer Radiant Ring -->
+  <circle cx="256" cy="256" r="200" fill="none" stroke="url(#gold)" stroke-width="6" opacity="0.4" />
+  <circle cx="256" cy="256" r="176" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="8 8" opacity="0.6" />
+
+  <!-- Central Heart Symbol with Cross Motif -->
+  <g filter="url(#glow)">
+    <!-- Heart outline -->
+    <path
+      d="M256 400s-140-86-140-184c0-50 40-90 90-90 32 0 60 16 75 42 15-26 43-42 75-42 50 0 90 40 90 90 0 98-140 184-140 184z"
+      fill="url(#gold)"
+    />
+    <!-- Inset Cross / Rays -->
+    <path
+      d="M256 160v160M206 220h100"
+      stroke="#0f172a"
+      stroke-width="18"
+      stroke-linecap="round"
+      opacity="0.9"
+    />
+  </g>
+</svg>
